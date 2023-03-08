@@ -268,7 +268,7 @@ slave:
   type: integer
   default: 0
 unique_id:
-  description: An ID that uniquely identifies this sensor. If two sensors have the same unique ID, Home Assistant will raise an exception.
+  description: An ID that uniquely identifies this sensor. Slaves will be given a unique_id of <<unique_id>>_<<slave_index>>. If two sensors have the same unique ID, Home Assistant will raise an exception.
   required: false
   type: string
 {% endconfiguration %}
@@ -375,7 +375,7 @@ binary_sensors:
       default: coil
       type: string
     unique_id:
-      description: An ID that uniquely identifies this sensor. If two sensors have the same unique ID, Home Assistant will raise an exception.
+      description: An ID that uniquely identifies this sensor. Slaves will be given a unique_id of <<unique_id>>_<<slave_index>>.  If two sensors have the same unique ID, Home Assistant will raise an exception.
       required: false
       type: string
     slave_count:
@@ -420,13 +420,20 @@ modbus:
         hvac_mode_register:
           address: 11
           values:
-            auto: 0
-            cool: 1
-            heat: 2
-            fan_only: 3
-            dry: 4
+            state_auto: 0
+            state_cool: 1
+            state_heat: 2
+            state_fan_only: 3
+            state_dry: 4
+            state_off: 5
         hvac_onoff_register: 11
 ```
+
+{% details "Previous configuration format" %}
+
+The configuration format of `hvac_mode_register` has changed. The old format uses keys such as `off`, `auto`, `cool` instead of `state_off`, `state_auto` and `state_cool` that is currently used. The old keys should no longer be used and is deprecated.
+
+{% enddetails %}
 
 {% configuration %}
 climates:
@@ -486,31 +493,31 @@ climates:
           required: true
           type: [map]
           keys:
-            "off":
+            state_off:
               description: The register value corresponding to HVAC Off mode.
               required: false
               type: integer
-            heat:
+            state_heat:
               description: The register value corresponding to HVAC Heat mode.
               required: false
               type: integer
-            cool:
+            state_cool:
               description: The register value corresponding to HVAC Cool mode.
               required: false
               type: integer
-            auto:
+            state_auto:
               description: The register value corresponding to HVAC Auto mode.
               required: false
               type: integer
-            dry:
+            state_dry:
               description: The register value corresponding to HVAC Dry mode.
               required: false
               type: integer
-            fan_only:
+            state_fan_only:
               description: The register value corresponding to HVAC Fan only mode.
               required: false
               type: integer
-            heat_cool:
+            state_heat_cool:
               description: The register value corresponding to HVAC Heat/Cool mode.
               required: false
               type: integer
@@ -986,12 +993,24 @@ sensors:
       description: Unit to attach to value.
       required: false
       type: string
+    min_value:
+      description: The minimum allowed value of a sensor. If value < min_value --> min_value. Can be float or integer
+      required: false
+      type: float
+    max_value:
+      description: The maximum allowed value of a sensor. If value > max_value --> max_value. Can be float or integer
+      required: false
+      type: float
+    zero_suppress:
+      description: Suppress values close to zero. If -zero_suppress <= value <= +zero_suppress --> 0. Can be float or integer
+      required: false
+      type: float
     state_class:
       description: The [state_class](https://developers.home-assistant.io/docs/core/entity/sensor#available-state-classes) of the sensor.
       required: false
       type: string
     unique_id:
-      description: An ID that uniquely identifies this sensor. If two sensors have the same unique ID, Home Assistant will raise an exception.
+      description: An ID that uniquely identifies this sensor. Slaves will be given a unique_id of <<unique_id>>_<<slave_index>>. If two sensors have the same unique ID, Home Assistant will raise an exception.
       required: false
       type: string
     slave_count:
@@ -1135,9 +1154,10 @@ following lines to configuration.yaml:
 
 ```yaml
 logger:
+  default: warning
   logs:
     homeassistant.components.modbus: debug
-    pymodbus.client: debug
+    pymodbus: debug
 ```
 
 and restart Home Assistant, reproduce the problem, and include the log in the issue.

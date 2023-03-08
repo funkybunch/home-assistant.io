@@ -198,7 +198,12 @@ automation:
 
 ## Numeric state trigger
 
-Fires when the numeric value of an entity's state (or attribute's value if using the `attribute` property, or the calculated value if using the `value_template` property) **crosses** (and only when crossing) a given threshold. On state change of a specified entity, attempts to parse the state as a number and fires if the value is changing from above to below or from below to above the given threshold.
+Fires when the numeric value of an entity's state (or attribute's value if using the `attribute` property, or the calculated value if using the `value_template` property) **crosses** a given threshold. On state change of a specified entity, attempts to parse the state as a number and fires if the value is changing from above to below or from below to above the given threshold.
+
+<div class='note'>
+Crossing the threshold means that the trigger only fires if the state wasn't previously within the threshold.
+If the current state of your entity is `50` and you set the threshold to `below: 75`, the trigger would not fire if the state changed to e.g. `49` or `72` because the threshold was never crossed. The state would first have to change to e.g. `76` and then to e.g. `74` for the trigger to fire.
+</div>
 
 {% raw %}
 
@@ -515,7 +520,7 @@ If for your use case this is undesired, you could consider using the automation 
 
 Fires when the sun is setting or rising, i.e., when the sun elevation reaches 0°.
 
-An optional time offset can be given to have it fire a set time before or after the sun event (e.g.,  45 minutes before sunset).
+An optional time offset can be given to have it fire a set time before or after the sun event (e.g.,  45 minutes before sunset). A negative value makes it fire before sunrise or sunset, a positive value afterwards. The offset needs to be specified in a hh:mm:ss format.
 
 <div class='note'>
 
